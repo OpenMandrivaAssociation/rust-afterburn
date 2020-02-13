@@ -1,0 +1,37 @@
+This reverts commit 7e870a1d51935c5ca8954b4b006387bbbf719d65.
+---
+ src/providers/vagrant_virtualbox/mod.rs | 11 ++---------
+ 1 file changed, 2 insertions(+), 9 deletions(-)
+
+diff --git a/src/providers/vagrant_virtualbox/mod.rs b/src/providers/vagrant_virtualbox/mod.rs
+index 975ae9c..4c45bc2 100644
+--- a/src/providers/vagrant_virtualbox/mod.rs
++++ b/src/providers/vagrant_virtualbox/mod.rs
+@@ -68,10 +68,7 @@ impl MetadataProvider for VagrantVirtualboxProvider {
+     fn attributes(&self) -> Result<HashMap<String, String>> {
+         let mut out = HashMap::with_capacity(2);
+ 
+-        let hostname = hostname::get()
+-            .chain_err(|| "unable to get hostname")?
+-            .to_string_lossy()
+-            .into_owned();
++        let hostname = hostname::get_hostname().ok_or("unable to get hostname")?;
+         let ip = VagrantVirtualboxProvider::get_ip()?;
+ 
+         out.insert("VAGRANT_VIRTUALBOX_HOSTNAME".to_string(), hostname);
+@@ -81,11 +78,7 @@ impl MetadataProvider for VagrantVirtualboxProvider {
+     }
+ 
+     fn hostname(&self) -> Result<Option<String>> {
+-        let hostname = hostname::get()
+-            .chain_err(|| "unable to get hostname")?
+-            .to_string_lossy()
+-            .into_owned();
+-        Ok(Some(hostname))
++        Ok(hostname::get_hostname())
+     }
+ 
+     fn ssh_keys(&self) -> Result<Vec<PublicKey>> {
+-- 
+2.25.0
+

@@ -1,0 +1,87 @@
+This reverts commit 322105d38f386363e088fa4a21984230241eed2c.
+---
+ src/retry/client.rs | 19 ++++++++++---------
+ 1 file changed, 10 insertions(+), 9 deletions(-)
+
+diff --git a/src/retry/client.rs b/src/retry/client.rs
+index 0771767..41d19e2 100644
+--- a/src/retry/client.rs
++++ b/src/retry/client.rs
+@@ -23,7 +23,8 @@ use std::borrow::Cow;
+ use std::io::Read;
+ use std::time::Duration;
+ 
+-use reqwest::{self, blocking, header, Method};
++use reqwest::header;
++use reqwest::{self, Method, Request};
+ use slog_scope::info;
+ 
+ use serde;
+@@ -94,7 +95,7 @@ impl Deserializer for Raw {
+ 
+ #[derive(Debug, Clone)]
+ pub struct Client {
+-    client: blocking::Client,
++    client: reqwest::Client,
+     headers: header::HeaderMap,
+     retry: Retry,
+     return_on_404: bool,
+@@ -102,7 +103,7 @@ pub struct Client {
+ 
+ impl Client {
+     pub fn try_new() -> Result<Self> {
+-        let client = blocking::Client::builder()
++        let client = reqwest::Client::builder()
+             .build()
+             .chain_err(|| "failed to initialize client")?;
+         Ok(Client {
+@@ -183,7 +184,7 @@ where
+     url: String,
+     body: Option<String>,
+     d: D,
+-    client: blocking::Client,
++    client: reqwest::Client,
+     headers: header::HeaderMap,
+     retry: Retry,
+     return_on_404: bool,
+@@ -203,7 +204,7 @@ where
+         T: for<'de> serde::Deserialize<'de>,
+     {
+         let url = reqwest::Url::parse(self.url.as_str()).chain_err(|| "failed to parse uri")?;
+-        let mut req = blocking::Request::new(Method::GET, url);
++        let mut req = Request::new(Method::GET, url);
+         req.headers_mut().extend(self.headers.clone().into_iter());
+ 
+         self.retry.clone().retry(|attempt| {
+@@ -216,7 +217,7 @@ where
+         let url = reqwest::Url::parse(self.url.as_str()).chain_err(|| "failed to parse uri")?;
+ 
+         self.retry.clone().retry(|attempt| {
+-            let mut builder = blocking::Client::new()
++            let mut builder = reqwest::Client::new()
+                 .post(url.clone())
+                 .headers(self.headers.clone())
+                 .header(header::CONTENT_TYPE, self.d.content_type());
+@@ -241,7 +242,7 @@ where
+         })
+     }
+ 
+-    fn dispatch_request<T>(&self, req: &blocking::Request) -> Result<Option<T>>
++    fn dispatch_request<T>(&self, req: &Request) -> Result<Option<T>>
+     where
+         T: for<'de> serde::Deserialize<'de>,
+     {
+@@ -273,8 +274,8 @@ where
+ 
+ /// Reqwests Request struct doesn't implement `Clone`,
+ /// so we have to do it here.
+-fn clone_request(req: &blocking::Request) -> blocking::Request {
+-    let mut newreq = blocking::Request::new(req.method().clone(), req.url().clone());
++fn clone_request(req: &Request) -> Request {
++    let mut newreq = Request::new(req.method().clone(), req.url().clone());
+     newreq
+         .headers_mut()
+         .extend(req.headers().clone().into_iter());
+-- 
+2.25.0
+

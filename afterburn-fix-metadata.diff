@@ -1,0 +1,33 @@
+--- afterburn-4.3.1/Cargo.toml	2020-01-21T15:19:26+00:00
++++ afterburn-4.3.1/Cargo.toml	2020-02-07T18:51:22.734139+00:00
+@@ -45,10 +45,10 @@
+ default-features = false
+ 
+ [dependencies.hostname]
+-version = "0.3"
++version = "0.1"
+ 
+ [dependencies.ipnetwork]
+-version = "^0.16.0"
++version = "^0.14.0"
+ 
+ [dependencies.maplit]
+ version = "^1.0.2"
+@@ -66,14 +66,13 @@
+ version = "^0.10.26"
+ 
+ [dependencies.pnet_base]
+-version = "^0.25.0"
++version = "^0.22.0"
+ 
+ [dependencies.pnet_datalink]
+-version = "^0.25.0"
++version = "^0.22.0"
+ 
+ [dependencies.reqwest]
+-version = "^0.10.1"
+-features = ["blocking"]
++version = "^0.9.24"
+ 
+ [dependencies.serde]
+ version = "1.0"
